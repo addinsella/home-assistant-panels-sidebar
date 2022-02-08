@@ -1,0 +1,794 @@
+kiosk_mode:
+  hide_header: true
+
+button_card_templates: !include panel_templates.yaml
+
+
+#####################################################################################################################################
+######## VIEWS ######################################################################################################################
+#####################################################################################################################################
+
+views:
+  - title: PANEL
+    ######## Random  background image from picsum ###############
+    background: >-
+      center / cover no-repeat fixed
+      url('https://picsum.photos/2560/1440?grayscale')
+    path: panel
+    theme: ""
+    type: custom:grid-layout
+    ######## Grid layout ###############
+    layout:
+      grid-template-columns: 100%
+      grid-template-rows: auto
+      grid-template-areas: |
+        "greeting"
+        "main"
+      mediaquery:
+        "(min-width: 910px)": ########### Sidebar becomes visible at this width #################
+          grid-template-columns: 3fr 1fr
+          grid-template-areas: |
+            "main sidebar"
+    badges: []
+    cards:
+
+
+#####################################################################################################################################
+######## GREETING   #################################################################################################################
+#####################################################################################################################################        
+
+
+      - type: custom:button-card
+        template: greeting
+        view_layout:
+          view-area: greeting
+          show:
+            mediaquery: "(max-width: 750px)"
+          #grid-column-start: 1
+          #grid-column-end: -1
+
+
+#####################################################################################################################################
+######## SIDEBAR ####################################################################################################################
+#####################################################################################################################################            
+      - type: custom:mod-card
+        card_mod:
+          style: |
+            ha-card {
+              padding: 0px;
+              box-shadow: none;
+              justify-self: start;
+              justify-content: start;
+              background-color: rgba(255,255,255,0.6);
+
+            }
+        view_layout:
+          grid-area: sidebar
+          show:
+            mediaquery: "(min-width: 750px)"
+        card:  
+          type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: 100%
+            grid-template-rows: auto
+          cards:
+          - type: custom:button-card
+            entity: sensor.time
+            show_state: true
+            show_icon: false
+            show_name: false
+            styles:
+              state:
+                - font-size: 48px
+                - text-align: left
+          - type: custom:button-card
+            template: greeting
+          - type: custom:auto-entities
+            show_empty: false
+            card:
+              type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: 1fr 1fr 1fr
+            filter:
+              include:
+                - state: 'on'
+                  domain: light
+                  options:
+                    type: custom:button-card
+                    template: switch
+                - state: 'on'
+                  domain: switch
+                  name: '*ceiling*'
+                  options:
+                    type: custom:button-card
+                    template: switch
+          - type: custom:auto-entities
+            show_empty: false
+            card:
+              type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: 1fr 1fr 1fr
+            filter:
+              include:
+                - state: 'on'
+                  attributes:
+                    device_class: '*door'
+                  options:
+                    type: custom:button-card
+                    template: binary_sensor
+                - entity_id: alarm_control_panel.home_alarm
+                  options:
+                    type: custom:button-card
+                    template: alarm
+          - type: custom:auto-entities
+            show_empty: false
+            card:
+              type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: 1fr
+            filter:
+              include:
+                - domain: media_player
+                  or:
+                    - state 1: 'on'
+                    - state 2: 'paused'
+                    - state 3: 'playing'
+                  options:
+                    type: custom:mini-media-player
+                    artwork: cover
+                    style: |
+                      :host {
+                        --ha-card-border-radius: 5px;
+                      }
+              exclude: []
+
+          - type: custom:auto-entities
+            show_empty: false
+            card:
+              type: entities
+              title: power consumption
+            filter:
+              include:
+                - attributes:
+                    unit_of_measurement: W
+                  state: '>10'
+              exclude:
+                - state: unavailable
+            sort:
+              method: state
+              reverse: true
+              numeric: true
+#####################################################################################################################################
+######## MAIN CARD ##################################################################################################################
+#####################################################################################################################################  
+            
+      - type: custom:mod-card
+        card_mod: ######### haven't quite figured out some of the styling problems ##########
+          style: |
+            ha-card {
+
+            }
+        view_layout:
+          grid-area: main
+        card:    
+          type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            mediaquery:
+              "(max-width: 500px)":
+                grid-template-columns: 1fr 1fr 1fr
+              "(max-width: 1200px)":
+                grid-template-columns: 150px 150px 150px 
+              "(max-width: 1350px)":
+                grid-template-columns: 150px 150px 150px 150px
+              "(max-width: 1500px)":
+                grid-template-columns: 150px 150px 150px 150px 150px
+              "(min-width: 1500px)":
+                grid-template-columns: 150px 150px 150px 150px 150px 150px
+          cards:
+
+#####################################################################################################################################
+######## LIVING ROOM#################################################################################################################
+#####################################################################################################################################                             
+      
+          - type: custom:button-card
+            template: header
+            name: living room
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                command: lovelace_reload
+            hold_action:
+              action: fire-dom-event
+              browser_mod:
+                command: window_reload
+            double_tap_action:
+              action: fire-dom-event
+              browser_mod:
+                command: popup
+                title: search
+                card:
+                  type: custom:search-card
+                  max_results: 10
+
+          - type: custom:button-card
+            entity: switch.living_room_ceiling_lights
+            icon: mdi:lightbulb-group
+            name: living room
+            template: switch
+          - type: custom:button-card
+            entity: fan.living_room_fan
+            name: fan
+            template: fan
+          - type: custom:button-card
+            entity: switch.dining_room_ceiling_lights
+            icon: mdi:lightbulb-group
+            name: dining room
+            template: switch
+          - type: custom:button-card
+            entity: switch.kitchen_ceiling_lights
+            icon: mdi:lightbulb-group
+            name: kitchen
+            template: switch
+          - type: custom:button-card
+            entity: light.living_accent_lights
+            name: accent lights
+            template: switch
+          - type: custom:button-card
+            entity: sensor.living_room_feels_like
+            name: feels like
+            template: sensor
+          - type: custom:button-card
+            entity: media_player.living_roomsonos
+            template: sonos
+            icon: phu:sonos-bookshelf-horizontal
+          - type: custom:swipe-card
+            parameters:
+              effect: coverflow
+              slidesPerView: auto
+              centeredSlides: true
+              pagination:
+                type: progressbar
+            cards:
+              - type: custom:button-card
+                entity: media_player.ccwgtv
+                template: tv
+                icon: mdi:television
+              - type: custom:button-card
+                entity: media_player.lg_tv
+                template: tv
+                icon: mdi:television
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    command: popup
+                    title: remote
+                    card:
+                      type: custom:lg-remote-control
+                      entity: media_player.lg_tv
+
+    #####################################################################################################################################
+    ######## MASTER BED  ################################################################################################################
+    #####################################################################################################################################
+
+          - type: custom:button-card
+            template: header
+            name: master bed
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+          - type: custom:button-card
+            entity: light.andy_bedside
+            icon: phu:table-shade
+            name: andy
+            template: switch
+          - type: custom:button-card
+            entity: light.nina_s_bedside
+            icon: phu:table-shade
+            name: nina
+            template: switch
+          - type: custom:button-card
+            name: fan controls
+            icon: mdi:fan
+            state_display: popup
+            template: base_template
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                command: popup
+                title: fan controls
+                card:
+                  type: custom:mod-card
+                  card_mod:
+                    style: |
+                      ha-card {
+                        
+                        background-image: url('https://picsum.photos/2560/1440?grayscale');
+                          background-position: center;
+                          
+                          background-size: cover;
+                      }
+                  card:
+                    type: custom:layout-card
+                    layout_type: custom:horizontal-layout
+                    layout:
+                      width: 100
+                      max_cols: 3
+                    cards:
+                      - type: custom:button-card
+                        entity: script.bed_1_fan_light
+                        icon: mdi:lightbulb
+                        name: light
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_1_fan_light
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_1_fan_low
+                        icon: mdi:fan-speed-1
+                        name: low
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_1_fan_low
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_1_fan_med
+                        icon: mdi:fan-speed-2
+                        name: medium
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_1_fan_med
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_1_fan_high
+                        icon: mdi:fan-speed-3
+                        name: high
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_1_fan_high
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_1_fan_off
+                        icon: mdi:fan-off
+                        name: "off"
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_1_fan_off
+                        template: script
+          - type: custom:button-card
+            name: white noise
+            state_display: popup
+            icon: mdi:speaker-wireless
+            template: base_template
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                command: popup
+                title: white noise
+                card:
+                  type: custom:mod-card
+                  card_mod:
+                    style: |
+                      ha-card {
+                        background-image: url('https://picsum.photos/2560/1440?grayscale');
+                          background-position: center;
+                          background-size: cover;
+                      }
+                  card:
+                    type: custom:layout-card
+                    layout_type: custom:horizontal-layout
+                    layout:
+                      width: 100
+                      max_cols: 3
+                    cards:
+                      - type: custom:slider-button-card
+                        entity: media_player.white_noise_speaker
+                        slider:
+                          direction: left-right
+                          background: solid
+                          use_state_color: false
+                          use_percentage_bg_opacity: false
+                          show_track: true
+                          toggle_on_click: false
+                          force_square: true
+                        show_name: true
+                        show_state: false
+                        compact: false
+                        icon:
+                          show: false
+                          use_state_color: false
+                          tap_action:
+                            action: more-info
+                          icon: ""
+                        action_button:
+                          mode: toggle
+                          icon: mdi:power
+                          show: false
+                          show_spinner: true
+                          tap_action:
+                            action: toggle
+                        name: Volume
+                      - type: custom:button-card
+                        entity: media_player.white_noise_speaker
+                        template: script
+                        name: vol down
+                        icon: mdi:volume-minus
+                        tap_action:
+                          action: call-service
+                          service: media_player.volume_down
+                          service_data:
+                            entity_id: media_player.white_noise_speaker
+                      - type: custom:button-card
+                        entity: media_player.white_noise_speaker
+                        icon: mdi:volume-plus
+                        template: script
+                        name: vol up
+                        tap_action:
+                          action: call-service
+                          service: media_player.volume_up
+                          service_data:
+                            entity_id: media_player.white_noise_speaker
+                      - type: custom:button-card
+                        entity: media_player.white_noise_speaker
+                        template: script
+                        name: play
+                        state:
+                          - value: playing
+                            color: yellow
+
+                        icon: mdi:play
+                        tap_action:
+                          action: call-service
+                          service: script.play_white_noise
+                      - type: custom:button-card
+                        entity: media_player.white_noise_speaker
+                        template: script
+                        name: stop
+                        icon: mdi:stop
+                        tap_action:
+                          action: call-service
+                          service: media_player.turn_off
+                          service_data:
+                            entity_id: media_player.white_noise_speaker
+
+          - type: custom:button-card
+            entity: sensor.temperature_17
+            name: temperature
+            template: sensor
+
+    #####################################################################################################################################
+    ######## WILL'S ROOM ################################################################################################################
+    #####################################################################################################################################        
+
+          - type: custom:button-card
+            template: header
+            name: will's room
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+          - type: custom:button-card
+            entity: light.hue_go
+            icon: phu:go
+            name: hue light
+            template: switch
+            double_tap_action:
+              action: call-service
+              service: scene.turn_on
+              service_data:
+                entity_id: scene.will_s_nightlight
+          - type: custom:button-card
+            entity: sensor.will_s_room
+            name: temperature
+            template: sensor
+
+    #####################################################################################################################################
+    ######## STUDY ######################################################################################################################
+    ##################################################################################################################################### 
+
+          
+          - type: custom:button-card
+            template: header
+            name: study
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+          - type: custom:button-card
+            entity: light.study_hue_play_lights
+            name: accent lights
+            template: switch
+            icon: phu:play-bar-two
+          - type: custom:button-card
+            entity: sensor.temperature_20
+            name: temperature
+            template: sensor
+          - type: custom:button-card
+            entity: input_boolean.wfh
+            template: switch
+            icon: phu:desktop-computer
+          - type: custom:button-card
+            entity: camera.sebcam
+            template: camera
+            view_layout:
+              grid-column-end: span 2
+          - type: custom:button-card
+            name: fan controls
+            icon: mdi:fan
+            state_display: popup
+            template: base_template
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                command: popup
+                title: fan controls
+                card:
+                  type: custom:mod-card
+                  card_mod:
+                    style: |
+                      ha-card 
+                      {
+                        background-image: url('https://picsum.photos/2560/1440?grayscale');
+                        background-position: center;
+                        background-size: cover;
+                      }
+                  card:
+                    type: custom:layout-card
+                    layout_type: custom:horizontal-layout
+                    layout:
+                      width: 100
+                      max_cols: 3
+                    cards:
+                      - type: custom:button-card
+                        entity: script.bed_3_fan_light
+                        icon: mdi:lightbulb
+                        name: fan light toggle
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_3_fan_light
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_3_fan_on
+                        icon: mdi:fan
+                        name: fan on
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_3_fan_on
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_3_fan_on_off
+                        icon: mdi:fan-off
+                        name: fan off
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_3_fan_on_off
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_3_fan_speed_up
+                        icon: mdi:fan-chevron-up
+                        name: speed up
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_3_fan_speed_up
+                        template: script
+                      - type: custom:button-card
+                        entity: script.bed_3_fan_speed_down
+                        icon: mdi:fan-chevron-down
+                        name: speed down
+                        tap_action:
+                          action: call-service
+                          service: script.turn_on
+                          service_data:
+                            entity_id: script.bed_3_fan_speed_down
+                        template: script
+                    columns: 3
+          - type: custom:button-card
+            template:
+              - switch
+              - circle
+            entity: switch.pi_hole
+            variables:
+              circle_input: |
+                [[[         
+                  return Intl.NumberFormat('en-AU', { notation: 'compact' }).format(states['sensor.pi_hole_ads_blocked_today'].state)
+                ]]]
+
+    #####################################################################################################################################
+    ######## SECURITY ## ################################################################################################################
+    ##################################################################################################################################### 
+          
+          - type: custom:button-card
+            template: header
+            name: security
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+          - type: custom:button-card
+            entity: binary_sensor.back_door_sensor
+            template: binary_sensor
+          - type: custom:button-card
+            entity: binary_sensor.openclose_10
+            template: binary_sensor
+          - type: custom:button-card
+            entity: binary_sensor.bifold_door_sensor
+            template: binary_sensor
+          - type: custom:button-card
+            entity: cover.garage_door
+            template: cover
+          - type: custom:button-card
+            entity: alarm_control_panel.home_alarm
+            template: alarm
+          - type: custom:button-card
+            entity: camera.dafang
+            template: camera
+            view_layout:
+              grid-column-end: span 2
+          - type: custom:button-card
+            entity: input_boolean.motion_alerts
+            template: switch
+          - type: custom:button-card
+            entity: person.andy
+            template: person
+          - type: custom:button-card
+            entity: person.nina
+            template: person
+
+    #####################################################################################################################################
+    ######## GARAGE #####################################################################################################################
+    ##################################################################################################################################### 
+
+          
+          - type: custom:button-card
+            template: header
+            name: garage
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+          - type: custom:button-card
+            entity: switch.garage_stairs
+            name: stairs
+            template: switch
+            icon: mdi:lightbulb
+          - type: custom:button-card
+            entity: binary_sensor.car
+            template: binary_sensor
+          - type: custom:button-card
+            entity: sensor.temperature_23
+            name: temperature
+            template: sensor
+          - type: custom:button-card
+            entity: sensor.pump_activations_today
+            icon: mdi:water-pump
+            template: sensor
+
+    #####################################################################################################################################
+    ######## OUTSIDE ####################################################################################################################
+    #####################################################################################################################################         
+
+          - type: custom:button-card
+            template: header
+            name: outside
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+          - type: custom:button-card
+            entity: switch.sprinkler
+            template:
+              - switch
+            icon: mdi:sprinkler-variant
+          - type: custom:button-card
+            entity: sensor.temperature_11
+            template: sensor
+          - type: custom:button-card
+            entity: sensor.wunderground_rain_today
+            template: sensor
+            name: rain today
+            icon: mdi:weather-rainy
+          - type: custom:button-card
+            entity: sensor.solar_radiation
+            icon: mdi:sun-wireless
+            template: sensor
+          - type: custom:button-card
+            entity: weather.brookvale
+            template: sensor
+            state_display: >-
+              [[[ return entity.state + " | " +
+              entity.attributes.temperature + "°C" ]]]
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                command: popup
+                title: weather
+                card:
+                  card_mod:
+                    style: |
+                      ha-card {
+                        background-color: rgba(255,255,255,0.1);
+                      }
+                  type: custom:weather-card
+                  entity: weather.brookvale
+                  number_of_forecasts: "8"
+                  current: true
+                  details: true
+                  hourly_forecast: false
+
+    #####################################################################################################################################
+    ######## OTHER ######################################################################################################################
+    #####################################################################################################################################              
+
+          - type: custom:button-card
+            template: header
+            name: other
+            view_layout:
+              grid-column-start: 1
+              grid-column-end: -1
+          - type: custom:state-switch
+            entity: sensor.blue_bin_collection
+            default: none
+            states:
+              "1":
+                type: custom:button-card
+                entity: sensor.blue_bin_collection
+                template: rubbish
+                styles:
+                  icon:
+                    - color: blue
+          - type: custom:state-switch
+            entity: sensor.yellow_bin_collection
+            default: none
+            states:
+              "1":
+                type: custom:button-card
+                entity: sensor.yellow_bin_collection
+                template: rubbish
+                styles:
+                  icon:
+                    - color: yellow
+          - type: custom:state-switch
+            entity: sensor.green_bin_collection
+            default: none
+            states:
+              "1":
+                type: custom:button-card
+                entity: sensor.green_bin_collection
+                template: rubbish
+                styles:
+                  icon:
+                    - color: green
+
+          - type: custom:button-card
+            entity: binary_sensor.living_room_occupancy
+            template: binary_sensor
+          - type: custom:button-card
+            entity: binary_sensor.pir_sensor
+            template: binary_sensor
+          - type: custom:button-card
+            entity: sensor.bh1750_illuminance
+            name: living room lux
+            template: sensor
+          - type: custom:button-card
+            entity: sensor.garage_ultrasonic
+            template: sensor
