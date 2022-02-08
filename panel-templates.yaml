@@ -1,0 +1,420 @@
+  ######## Alarm ###############
+  alarm:
+    state:
+      - value: disarmed
+        icon: mdi:shield-off
+        styles:
+          icon:
+            - color: green
+          card:
+            - filter: opacity(50%)
+      - value: armed_home
+        icon: mdi:shield-home
+        styles:
+          icon:
+            - color: red
+      - value: armed_away
+        icon: mdi:shield-lock
+        styles:
+          icon:
+            - color: red
+      - value: arming
+        icon: mdi:shield
+        styles:
+          icon:
+            - color: orange
+            - animation: blink 2s ease infinite
+    template: base_template
+
+  ######## Base template ###############
+  base_template:
+    color_type: icon
+    color: auto
+    size: 30%
+    aspect_ratio: 1/1
+    show_state: true
+    styles:
+      card:
+        - filter: opacity(90%)
+      grid:
+        - grid-template-areas: '"i" "n" "s"'
+        - grid-template-columns: 1fr
+        - grid-template-rows: 1fr min-content min-content
+      img_cell:
+        - height: 100%
+        - display: contents
+      icon:
+        - position: relative
+        - margin-top: "-10%"
+        - margin-left: 5%
+      name:
+        - justify-self: start
+        - padding-left: 10px
+        - text-transform: lowercase
+        - font-weight: bold
+        - font-size: 15px
+      state:
+        - justify-self: start
+        - padding-left: 10px
+        - text-transform: lowercase
+        - font-size: 15px
+
+  ######## Bin collection ###############
+  rubbish:
+    tap_action:
+      action: none
+    template:
+      - base_template
+    state_display: >-
+      [[[ if (entity.state == "2") return `in ${entity.attributes.days} days`;
+      else if (entity.state == "1") return "Tomorrow"; else if (entity.state ==
+      "0") return "Today" ]]]
+
+  ######## Binary sensors ###############
+  binary_sensor:
+    styles:
+      icon:
+        - color: var(--state-icon-active-color)
+    state:
+      - value: "off"
+        styles:
+          card:
+            - filter: opacity(50%)
+    template:
+      - base_template
+      - circle
+    variables:
+      circle_input: |
+        [[[         
+          let c = Math.round(Date.now() - Date.parse(entity.last_changed));
+          let s = (c/1e3), m = (c/6e4), h = (c/36e5), d = (c/864e5);
+          return s < 60 ? parseInt(s) + 's' : m < 60 ? parseInt(m) + 'm' : h < 24 ? parseInt(h) + 'h' : parseInt(d) + 'd';
+        ]]]
+
+  ######## Cameras ###############
+  camera:
+    show_live_stream: true
+    show_state: false
+    show_name: false
+  #  aspect_ratio: 2/1
+    styles:
+      card:
+        - padding: 0px
+        - height: 100%
+      entity_picture:
+        - height: 100%
+        - width: 100%
+        - position: absolute
+
+  ######## Circle element in top right of card ###############
+  circle:
+    custom_fields:
+      circle: |
+        [[[
+            const input = variables.circle_input;
+            const radius = 18;
+            const circumference = radius * 2 * Math.PI;
+            return `
+              <svg viewBox="0 0 50 50">
+                <circle cx="25" cy="25" r="${radius}" stroke="var(--disabled-text-color)" stroke-width="2" fill=rgba(255,255,255,0.5) />
+                <text x="50%" y="52%" fill="var(--primary-text-color)" font-size="12" text-anchor="middle" alignment-baseline="middle">${input}</text>
+              </svg>
+            `;
+        ]]]
+    styles:
+      custom_fields:
+        circle:
+          - top: 5px
+          - right: 5px
+          - width: 35%
+          - position: absolute
+
+  ######## Covers ###############
+  cover:
+    hold_action:
+      action: more-info
+    state:
+      - value: closed
+        styles:
+          card:
+            - filter: opacity(50%)
+    template: base_template
+
+  ######## Double wide card ###############
+  two-wide-custom:
+    aspect_ratio: 2.05/1
+    custom_fields:
+      display:
+        card:
+          style: |
+            ha-card {
+              box-shadow: none;
+            }
+    styles:
+      custom_fields:
+        display:
+          - filter: opacity(90%)
+          - overflow: unset
+      card:
+        - filter: opacity(90%)
+        - overflow: set
+      grid:
+        - grid-template-areas: '"display"'
+        - grid-template-columns: 1fr
+        - grid-template-rows: 1fr
+
+  ######## Fans ###############
+  fan:
+    icon: |
+      [[[
+        if (entity.attributes.percentage == 33) return 'mdi:fan-speed-1';
+        else if (entity.attributes.percentage == 66) return 'mdi:fan-speed-2';
+        else if (entity.attributes.percentage == 100) return 'mdi:fan-speed-3';
+        else return 'mdi:fan-off';
+      ]]]
+    state_display: "[[[ return entity.attributes.speed ]]]"
+    hold_action:
+      action: more-info
+    state:
+      - value: "on"
+        spin: false
+        styles:
+          card:
+            - filter: opacity(90%)
+          icon:
+            - animation: rotating 2s ease 1
+      - value: "off"
+        styles:
+          card:
+            - filter: opacity(50%)
+          icon:
+            - filter: grayscale(100%)
+    template: base_template
+
+  ######## Greeting card ###############
+  greeting:
+    show_icon: false
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        #- background: rgba(255,255,255,0.6)
+        - box-shadow: none
+        - padding: 0px
+        - filter: opacity(90%)
+        
+        
+      name:
+        - margin: 10px
+        - color: white
+        - mix-blend-mode: difference
+        - font-size: small
+        - text-align: left
+        - white-space: initial
+        - text-overflow: initial
+        - overflow: visible
+    name: >-
+        [[[ 
+          var d = new Date(); var n = d.getHours(); 
+          var greeting = "";
+          // TIME OF DAY GREETING //
+          if (0 <= n && n< 12) 
+            greeting = "Good morning " + user.name;
+          else if (12 <= n && n < 17)
+            greeting = "Good afternoon " + user.name; 
+          else if (17 <= n && n < 24) 
+            greeting = "Good evening " + user.name; 
+          else 
+            greeting = "ERROR";
+          // OUTSIDE TEMPERATURE //
+          greeting = greeting + ". The temperature outside is " + states['sensor.temperature_11'].state + "°C.";
+          // FORECAST TEMPERATURE //
+          greeting = greeting + " Forecast high of " + states['sensor.brookvale_temp_max_0'].state + "°C and a low of " + states['sensor.brookvale_temp_min_1'].state + "°C.";
+          // FORECAST RAIN //
+          var rain_forecast = "";
+          rain_forecast = "There is a " + states['sensor.brookvale_rain_chance_0'].state + "% chance of " + states['sensor.brookvale_rain_amount_range_0'].state + "mm of rain.";
+          // RAINFALL TODAY //
+          var rain_today = ""
+          rain_today = " There has been " + states['sensor.wunderground_rain_today'].state + "mm of rain since midnight."
+          
+          greeting = greeting + rain_forecast + rain_today
+
+          return greeting;
+        ]]]  
+
+  ######## Header card ###############
+  header:
+    show_icon: false
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - padding: 0px
+      name:
+        - justify-self: start
+        - margin-left: 10px
+        - font-size: x-large
+        - color: white
+        - mix-blend-mode: difference
+
+  ######## Lights / switches ###############
+  switch:
+    extra_styles: |
+      @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    hold_action:
+      action: more-info
+    state:
+      - value: "on"
+        styles:
+          icon:
+            - animation: shake 0.5s ease 0.5
+          card:
+            - filter: opacity(90%)
+      - value: "off"
+        styles:
+          card:
+            - filter: opacity(50%)
+          icon:
+            - filter: grayscale(100%)
+    template: base_template
+
+  ######## Media ###############
+  media:
+    template: base_template
+    state:
+      - value: "off"
+        styles:
+          card:
+            - filter: opacity(50%)
+          icon:
+            - filter: grayscale(100%)
+    tap_action:
+      action: fire-dom-event
+      browser_mod:
+        command: popup
+        title: "[[[ return entity.attributes.friendly_name ]]]"
+        card:
+          type: custom:mini-media-player
+          entity: "[[[ return entity.entity_id]]]"
+          artwork: full-cover
+
+  ######## Person ##############
+  person:
+    template: binary_sensor
+    styles:
+      card:
+        - color: white
+        - background-size: cover
+        - background-image: '[[[ return `url("${entity.attributes.entity_picture}")` ]]]'
+        - background-position: center center
+        - filter: opacity(90%)
+
+  ######## Scripts ###############
+  script:
+    state_display: toggle
+    styles:
+      card:
+        - "--mdc-ripple-color": blue
+        - "--mdc-ripple-press-opacity": 0.5
+    variables:
+      circle_input: |
+        [[[
+          let c = Math.round(Date.now() - Date.parse(entity.last_changed));
+          let s = (c/1e3), m = (c/6e4), h = (c/36e5), d = (c/864e5);
+          return s < 60 ? parseInt(s) + 's' : m < 60 ? parseInt(m) + 'm' : h < 24 ? parseInt(h) + 'h' : parseInt(d) + 'd';
+        ]]]
+    template:
+      - base_template
+      - circle
+
+  ######## Sensors ###############
+  sensor:
+    hold_action:
+      action: more-info
+    tap_action:
+      action: fire-dom-event
+      browser_mod:
+        command: popup
+        title: "[[[ return entity.attributes.friendly_name ]]]"
+        card:
+          type: custom:apexcharts-card
+          series:
+            - entity: "[[[ return entity.entity_id ]]]"
+              curve: stepline
+              stroke_width: 2
+    styles:
+      icon:
+        - color: var(--state-icon-active-color)
+    state:
+      - value: "on"
+        styles:
+          card:
+            - filter: opacity(90%)
+      - value: "off"
+        styles:
+          card:
+            - filter: opacity(50%)
+          icon:
+            - filter: grayscale(100%)
+    variables:
+      circle_input: |
+        [[[         
+          let c = Math.round(Date.now() - Date.parse(entity.last_changed));
+          let s = (c/1e3), m = (c/6e4), h = (c/36e5), d = (c/864e5);
+          return s < 60 ? parseInt(s) + 's' : m < 60 ? parseInt(m) + 'm' : h < 24 ? parseInt(h) + 'h' : parseInt(d) + 'd';
+        ]]]
+    template:
+      - base_template
+      - circle
+
+  ######## Sonos ########################
+  sonos:
+    template: media
+    state_display: '[[[ if (entity.state == "paused") { return "off"; } ]]]'
+    state:
+      - value: paused
+        styles:
+          card:
+            - filter: opacity(50%)
+          icon:
+            - filter: grayscale(100%)
+      - value: playing
+        styles:
+          card:
+            - background-size: cover
+            - background-image: '[[[ return `url("${entity.attributes.entity_picture}")` ]]]'
+            - background-position: center center
+            - filter: opacity(90%)
+          icon:
+            - color: white
+          name:
+            - color: white
+          state:
+            - color: white
+
+  ######## TV ########################
+  tv:
+    template: media
+    state:
+      - value: paused
+        styles:
+          card:
+            - filter: opacity(90%)
+      - value: playing
+        styles:
+          card:
+            - filter: opacity(90%)
