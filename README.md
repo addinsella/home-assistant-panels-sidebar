@@ -1,38 +1,40 @@
 # home-assistant-panels-sidebar
 my home assistant yaml code for a nice lovelace dashboard
 
-Component parts
+[this](https://github.com/matt8707/hass-config) and [this](https://community.home-assistant.io/t/clean-tile-based-lovelace-ui-only-2-cards-needed/184108)
 
-Overarching CSS grid with layout-card
+# Component parts
 
-Greeting card
+## Overarching CSS grid with layout-card
 
-Sidebar card
+## Greeting card
 
-CSS grid with layout card
+## Sidebar card
 
-Main card
+### CSS grid with layout card
 
-CSS grid with layout card
+## Main card
 
-Individual card types
+### CSS grid with layout card
 
-Alarm
-Base template
-Bin collection
-Binary sensors
-Cameras
-Covers
-Double-wide card
-Fans
-Greeting card
-Header
-Lights/switches
-Media
-Person
-Script
-Sensor
-Sonos
-TV
+# Individual card types
 
-Circle
+## Alarm
+## Base template
+## Bin collection
+## Binary sensors
+## Cameras
+## Covers
+## Double-wide card
+## Fans
+## Greeting card
+## Header
+## Lights/switches
+## Media
+## Person
+## Script
+## Sensor
+## Sonos
+## TV
+
+## Circle
