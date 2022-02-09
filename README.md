@@ -27,6 +27,7 @@ my home assistant yaml code for a nice lovelace dashboard
 ## Covers
 ## Double-wide card
 ## Fans
+![fans](/images/fan.gif)
 ## Greeting card
 ## Header
 ## Lights/switches
