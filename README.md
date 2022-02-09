@@ -30,6 +30,7 @@ my home assistant yaml code for a nice lovelace dashboard
 ## Greeting card
 ## Header
 ## Lights/switches
+![lights / switches](/images/light-switch.gif)
 ## Media
 ## Person
 ## Script
