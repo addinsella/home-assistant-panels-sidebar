@@ -20,6 +20,7 @@ my home assistant yaml code for a nice lovelace dashboard
 # Individual card types
 
 ## Alarm
+![alarm](/images/alarm.gif)
 ## Base template
 ## Bin collection
 ## Binary sensors
@@ -33,9 +34,11 @@ my home assistant yaml code for a nice lovelace dashboard
 ## Lights/switches
 ![lights / switches](/images/light-switch.gif)
 ## Media
+![media](/images/media.png)
 ## Person
 ## Script
 ## Sensor
+![sensors](/images/sensor.png)
 ## Sonos
 ## TV
 
