@@ -34,11 +34,11 @@ my home assistant yaml code for a nice lovelace dashboard
 ## Lights/switches
 ![lights / switches](/images/light-switch.gif)
 ## Media
-![media](/images/media.png)
+![media](/images/media.PNG)
 ## Person
 ## Script
 ## Sensor
-![sensors](/images/sensor.png)
+![sensors](/images/sensor.PNG)
 ## Sonos
 ## TV
 
